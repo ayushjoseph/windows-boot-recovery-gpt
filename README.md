@@ -4,27 +4,27 @@ A real-world system failure → investigation → recovery → optimization case
 
 📌 Overview
 
-This project documents a real system breakdown where a partition-level operation corrupted the GPT partition table, wiped all partitions, removed the EFI boot manager, and pushed the system into PXE network boot.
+This project documents a real system breakdown where a partition-level disk operation corrupted the GPT partition table, removed all partitions, deleted the EFI boot manager, and forced the system into PXE network boot.
 
-The laptop was completely unbootable.
+The laptop became completely unbootable.
 
-Instead of sending the machine for service, I diagnosed the problem at the storage and firmware level, rebuilt the disk manually, reinstalled Windows, fixed driver failures, and optimized the system for development work.
+Instead of sending the machine for service, I diagnosed the issue at the storage and firmware level, manually rebuilt the disk layout, reinstalled Windows, resolved driver failures, and optimized the system for development and daily use.
 
-This repo serves as:
+This repository serves as:
 
-A real-world troubleshooting example
+A real-world troubleshooting case study
 
 A learning resource for OS internals
 
-A practical system recovery guide
+A practical Windows recovery reference
 
-A demonstration of recovery-level thinking
+A demonstration of recovery-level system thinking
 
 💥 What Went Wrong
 
 A disk utility rebuild operation overwrote a corrupted GPT header.
 
-Instant result:
+Immediate impact:
 
 All partitions disappeared
 
@@ -34,132 +34,168 @@ Recovery environment destroyed
 
 Windows unreachable
 
-images/
+System forced into PXE network boot
 
-🔍 Investigation
-BIOS Result
+🖥️ System Information
 
-SSD was detected but had no boot entry.
+Laptop: Lenovo IdeaPad Gaming 3
 
-DiskPart Output
+CPU: AMD Ryzen (with Radeon Graphics)
+
+GPU: NVIDIA GeForce RTX 3050 + AMD Radeon iGPU
+
+Storage: NVMe SSD (GPT)
+
+OS: Windows 11 Home Single Language
+
+Boot Mode: UEFI
+
+❌ Initial Problem
+
+System failed to boot
+
+BIOS showed No Boot Device Found
+
+SSD detected but partitions missing
+
+Windows installer could not detect an OS
+
+GPT partition table corrupted
+
+🔍 Symptoms Observed
+
+Empty disk view in Windows Installer
+
+Invalid partition layout in disk utilities
+
+No EFI boot entry present
+
+Recovery environment partially broken
+
+🛠️ Recovery Approach (High-Level)
+
+Booted into Windows Recovery Environment (WinRE)
+
+Inspected disk state using DiskPart
+
+Removed corrupted partition metadata
+
+Rebuilt GPT layout manually
+
+Created EFI, MSR, and Primary partitions
+
+Reinstalled Windows 11
+
+Restored UEFI boot functionality
+
+Performed post-install cleanup and optimization
+
+🧰 Tools Used
+
+Windows Recovery Environment (WinRE)
+
+DiskPart
+
+Windows 11 USB Installer
+
+BIOS Boot Menu
+
+Disk Management
+
+Command Prompt (Administrator)
+
+⌨️ Key Commands Used
+Disk Inspection
 diskpart
 list disk
 select disk 0
-list part
+list partition
 
-
-Output:
-
-No partitions found
-Disk shows full unallocated space
-
-
-The disk still existed.
-The partition table did not.
-
-🔧 Recovery Steps Performed
-1. Wipe corrupted GPT metadata
-diskpart
+Cleaning Corrupted GPT
 select disk 0
 clean
 convert gpt
 
-2. Recreate Windows boot structure manually
-
-EFI (Boot Partition):
-
+Creating Required Partitions
 create partition efi size=100
-format fs=fat32 quick label="System"
+format fs=fat32 quick
 assign letter=S
-
-
-Microsoft Reserved:
 
 create partition msr size=16
 
-
-Windows partition:
-
 create partition primary
-format fs=ntfs quick label="Windows"
-assign letter=W
+format fs=ntfs quick
+assign letter=C
 
-3. Install Windows
+Exit DiskPart
+exit
 
-Custom installation → target rebuilt primary partition.
+🪟 Windows Installation
 
-4. Fix Windows “No Internet” Setup Block
+Installed Windows 11 on the newly created primary partition
 
-During OOBE stage:
+Windows automatically created required system and recovery structures
 
-OOBE\BYPASSNRO
+Skipped mandatory network requirement using OOBE bypass
 
+Completed local account setup
 
-Allowed offline setup and completed install.
+⚙️ Post-Installation Steps
 
-⚙️ Post-install Setup
-Driver Stack (critical order)
+Verified disk layout using Disk Management
 
-AMD Radeon
+Created a separate Data (D:) partition
 
-NVIDIA RTX 3050
+Moved user folders:
 
-System tuning
+Desktop
 
-Lenovo Vantage updates
+Downloads
 
-Windows Update
+Documents
 
-Power mode optimization
+Pictures
 
-💾 Storage Architecture Optimization
+Videos
 
-Repartitioned SSD for development workflow:
+Installed GPU drivers:
 
-Drive	Purpose
-C: (250GB)	OS + tools + WSL
-D: (226GB)	Projects & data
+NVIDIA GeForce Experience (RTX 3050)
 
-Moved downloads, documents, desktop, and media to D:.
+AMD Radeon Software
 
-🧠 What This Taught Me
+Verified Windows activation status
 
-✔ GPT corruption causes total OS loss
-✔ PXE boot often means bootloader missing, not hardware
-✔ DiskPart is the safest recovery tool
-✔ Partitioning improves long-term maintainability
-✔ Driver install order matters on hybrid GPU systems
-✔ Troubleshooting is logic, not guessing
+⚠️ Limitations
 
-🛠️ Tools Used
+OEM recovery partition (Lenovo OneKey Recovery) is missing
 
-Windows Recovery Environment
+Factory reset via Lenovo tools is unavailable
 
-DiskPart
+Windows reset via Settings still functions normally
 
-BIOS / UEFI
+📚 Learning Outcomes
 
-Lenovo Vantage
+Deep understanding of GPT & UEFI boot flow
 
-AMD & NVIDIA Drivers
+Manual disk recovery techniques
 
-Windows Installer
+Windows boot architecture (EFI → Boot Manager → OS)
 
-Native CLI utilities
+Safe partitioning strategies
 
-🎯 Final Result
+Real-world troubleshooting under failure conditions
 
-✅ Fully restored system
-✅ Clean OS installation
-✅ Optimized for development
-✅ Dual GPU enabled
-✅ Correct boot architecture
-✅ Professional system layout
+✅ Final Status
 
-Machine rebuilt from raw disk to working system.
+✔ System fully functional
 
+✔ Windows activated
 
+✔ Dual GPU drivers installed
 
-BIOS falling back to PXE network boot
+✔ Optimized disk layout for development & daily use
 
-Windows installer unable to detect SSD
+👤 Author
+
+Ayush Joseph
