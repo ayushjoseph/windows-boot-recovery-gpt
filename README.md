@@ -34,7 +34,7 @@ Recovery environment destroyed
 
 Windows unreachable
 
-
+images/
 
 🔍 Investigation
 BIOS Result
